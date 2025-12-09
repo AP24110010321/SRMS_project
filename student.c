@@ -186,11 +186,11 @@ void adminMenu() {
 
         printf("Choice: ");
         if (scanf("%d", &choice) != 1) {
-            while(getchar() != '\n'); // Clear input buffer
+            while(getchar() != '\n'); 
             choice = 0;
             continue;
         }
-        while(getchar() != '\n'); // Clear input buffer
+        while(getchar() != '\n');
 
         switch (choice) {
             case 1: addStudent(); break;
@@ -287,19 +287,19 @@ void addStudent() {
     
     printf("\n===== ADD NEW STUDENT =====\n");
     
-    // Get and validate roll number
+    
     s.roll = getValidInteger("Enter Roll Number: ", 1, 999999);
     
-    // Check for duplicate roll number
+    
     if (isDuplicateRoll(s.roll)) {
         printf("Error: Roll number %d already exists!\n", s.roll);
         return;
     }
     
-    // Get name
+  
     getValidString("Enter Name (no spaces): ", s.name, MAX_NAME_LENGTH);
     
-    // Get marks
+   
     s.marks = getValidFloat("Enter Marks (0-100): ", 0.0, 100.0);
     
     FILE *fp = fopen(STUDENT_FILE, "a");
@@ -331,17 +331,17 @@ void displayStudents() {
     printf("%-10s %-20s %-10s\n", "Roll", "Name", "Marks");
     printf("--------------------------------------------\n");
 
-    // Skip header line if it exists
+   
     char buffer[MAX_BUFFER];
     if (fgets(buffer, sizeof(buffer), fp)) {
-        // Check if first line is header
+        
         int testRoll;
         float testMarks;
         char testName[MAX_NAME_LENGTH];
         if (sscanf(buffer, "%d %s %f", &testRoll, testName, &testMarks) != 3) {
-            // It's a header, continue
+            
         } else {
-            // First line is data, print it
+            
             printf("%-10d %-20s %-10.2f\n", testRoll, testName, testMarks);
         }
     }
@@ -376,14 +376,14 @@ void searchStudent() {
         return;
     }
 
-    // Skip header line if exists
+    
     char buffer[MAX_BUFFER];
     if (fgets(buffer, sizeof(buffer), fp)) {
         int testRoll;
         float testMarks;
         char testName[MAX_NAME_LENGTH];
         if (sscanf(buffer, "%d %s %f", &testRoll, testName, &testMarks) == 3) {
-            // First line is data, check it
+           
             if (testRoll == roll) {
                 printf("\n===== RECORD FOUND =====\n");
                 printf("Roll Number: %d\n", testRoll);
@@ -440,24 +440,24 @@ void updateStudent() {
         return;
     }
 
-    // Handle header line
+    
     char buffer[MAX_BUFFER];
     if (fgets(buffer, sizeof(buffer), fp)) {
         int testRoll;
         float testMarks;
         char testName[MAX_NAME_LENGTH];
         if (sscanf(buffer, "%d %s %f", &testRoll, testName, &testMarks) == 3) {
-            // First line is data, check if it needs update
+           
             if (testRoll == roll) {
                 printf("\nCurrent Record:\n");
                 printf("Roll: %d, Name: %s, Marks: %.2f\n", testRoll, testName, testMarks);
                 
                 if (strcmp(currentRole, "STAFF") == 0) {
-                    // Staff can only update marks
+                   
                     float newMarks = getValidFloat("Enter New Marks (0-100): ", 0.0, 100.0);
                     fprintf(temp, "%d %s %.2f\n", testRoll, testName, newMarks);
                 } else {
-                    // Admin can update name and marks
+                   
                     getValidString("Enter New Name: ", testName, MAX_NAME_LENGTH);
                     float newMarks = getValidFloat("Enter New Marks (0-100): ", 0.0, 100.0);
                     fprintf(temp, "%d %s %.2f\n", testRoll, testName, newMarks);
@@ -467,7 +467,7 @@ void updateStudent() {
                 fprintf(temp, "%s", buffer);
             }
         } else {
-            // It's a header
+        
             fprintf(temp, "%s", buffer);
         }
     }
@@ -478,10 +478,10 @@ void updateStudent() {
             printf("Roll: %d, Name: %s, Marks: %.2f\n", s.roll, s.name, s.marks);
             
             if (strcmp(currentRole, "STAFF") == 0) {
-                // Staff can only update marks
+              
                 s.marks = getValidFloat("Enter New Marks (0-100): ", 0.0, 100.0);
             } else {
-                // Admin can update name and marks
+               
                 getValidString("Enter New Name: ", s.name, MAX_NAME_LENGTH);
                 s.marks = getValidFloat("Enter New Marks (0-100): ", 0.0, 100.0);
             }
@@ -527,14 +527,14 @@ void deleteStudent() {
         return;
     }
 
-    // Handle header line
+
     char buffer[MAX_BUFFER];
     if (fgets(buffer, sizeof(buffer), fp)) {
         int testRoll;
         float testMarks;
         char testName[MAX_NAME_LENGTH];
         if (sscanf(buffer, "%d %s %f", &testRoll, testName, &testMarks) == 3) {
-            // First line is data
+            
             if (testRoll == roll) {
                 found = 1;
                 printf("\nDeleting: Roll %d, Name: %s, Marks: %.2f\n", testRoll, testName, testMarks);
@@ -542,7 +542,7 @@ void deleteStudent() {
                 fprintf(temp, "%s", buffer);
             }
         } else {
-            // It's a header
+           
             fprintf(temp, "%s", buffer);
         }
     }
@@ -586,7 +586,7 @@ void showStatistics() {
     printf("          GRADE STATISTICS & ANALYTICS                     \n");
     printf("============================================================\n\n");
 
-    /* (statistics code unchanged) */
+   
     float totalMarks = 0.0;
     float highest = -1.0;
     float lowest = 101.0;
