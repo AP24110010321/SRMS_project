@@ -1,8 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <conio.h>
 #include <ctype.h>
+
+#ifdef _WIN32
+  #include <conio.h>   /* _getch is available here */
+#else
+  /* Provide a small _getch() implementation for POSIX (Linux/macOS) */
+  #include <termios.h>
+  #include <unistd.h>
+
+  int _getch(void) {
+      struct termios oldt, newt;
+      int ch;
+      tcgetattr(STDIN_FILENO, &oldt);
+      newt = oldt;
+      newt.c_lflag &= ~(ICANON | ECHO);
+      tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+      ch = getchar();
+      tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+      return ch;
+  }
+#endif
 
 #define STUDENT_FILE "students.txt"
 #define CREDENTIAL_FILE "credentials.txt"
@@ -335,7 +354,7 @@ void displayStudents() {
 
     fclose(fp);
     
-    if (count == 0 && feof(fp)) {
+    if (count == 0) {
         printf("No student records to display.\n");
     }
     printf("--------------------------------------------\n");
@@ -567,7 +586,7 @@ void showStatistics() {
     printf("          GRADE STATISTICS & ANALYTICS                     \n");
     printf("============================================================\n\n");
 
-    // Variables for statistics
+    /* (statistics code unchanged) */
     float totalMarks = 0.0;
     float highest = -1.0;
     float lowest = 101.0;
@@ -576,25 +595,20 @@ void showStatistics() {
     char topperName[MAX_NAME_LENGTH] = "";
     int topperRoll = 0;
     
-    // Skip header line if exists
     char buffer[MAX_BUFFER];
     if (fgets(buffer, sizeof(buffer), fp)) {
         int testRoll;
         float testMarks;
         char testName[MAX_NAME_LENGTH];
         if (sscanf(buffer, "%d %s %f", &testRoll, testName, &testMarks) == 3) {
-            // First line is data
             totalMarks += testMarks;
             count++;
-            
             if (testMarks > highest) {
                 highest = testMarks;
                 strncpy(topperName, testName, MAX_NAME_LENGTH - 1);
                 topperRoll = testRoll;
             }
             if (testMarks < lowest) lowest = testMarks;
-            
-            // Grade classification
             if (testMarks >= 90) gradeA++;
             else if (testMarks >= 80) gradeB++;
             else if (testMarks >= 70) gradeC++;
@@ -603,19 +617,15 @@ void showStatistics() {
         }
     }
 
-    // Process remaining records
     while (fscanf(fp, "%d %49s %f", &s.roll, s.name, &s.marks) == 3) {
         totalMarks += s.marks;
         count++;
-        
         if (s.marks > highest) {
             highest = s.marks;
             strncpy(topperName, s.name, MAX_NAME_LENGTH - 1);
             topperRoll = s.roll;
         }
         if (s.marks < lowest) lowest = s.marks;
-        
-        // Grade classification
         if (s.marks >= 90) gradeA++;
         else if (s.marks >= 80) gradeB++;
         else if (s.marks >= 70) gradeC++;
@@ -632,7 +642,6 @@ void showStatistics() {
 
     float average = totalMarks / count;
 
-    // Display statistics
     printf(">> OVERALL STATISTICS:\n");
     printf("------------------------------------------------------------\n");
     printf("   Total Students:        %d\n", count);
@@ -663,7 +672,6 @@ void showStatistics() {
            gradeF, gradeF * 100.0 / count);
     printf("\n");
 
-    // Visual bar chart
     printf(">> VISUAL GRADE DISTRIBUTION:\n");
     printf("------------------------------------------------------------\n");
     
@@ -760,10 +768,9 @@ void getValidString(const char* prompt, char* str, int maxLen) {
         if (scanf(format, str) == 1) {
             clearInputBuffer();
             
-            // Check if string contains only alphanumeric characters
             int valid = 1;
             for (int i = 0; str[i] != '\0'; i++) {
-                if (!isalnum(str[i]) && str[i] != '_' && str[i] != '-') {
+                if (!isalnum((unsigned char)str[i]) && str[i] != '_' && str[i] != '-') {
                     valid = 0;
                     break;
                 }
@@ -791,7 +798,6 @@ int fileExists(const char* filename) {
 }
 
 void initializeFiles() {
-    // Check if students.txt exists, if not create with header
     if (!fileExists(STUDENT_FILE)) {
         FILE *fp = fopen(STUDENT_FILE, "w");
         if (fp) {
@@ -800,7 +806,6 @@ void initializeFiles() {
         }
     }
     
-    // Check if credentials.txt exists
     if (!fileExists(CREDENTIAL_FILE)) {
         FILE *fp = fopen(CREDENTIAL_FILE, "w");
         if (fp) {
@@ -820,7 +825,6 @@ int isDuplicateRoll(int roll) {
     struct Student s;
     char buffer[MAX_BUFFER];
     
-    // Skip/check first line
     if (fgets(buffer, sizeof(buffer), fp)) {
         int testRoll;
         float testMarks;
