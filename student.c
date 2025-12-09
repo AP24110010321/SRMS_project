@@ -4,9 +4,9 @@
 #include <ctype.h>
 
 #ifdef _WIN32
-  #include <conio.h>   /* _getch is available here */
+  #include <conio.h>  
 #else
-  /* Provide a small _getch() implementation for POSIX (Linux/macOS) */
+  
   #include <termios.h>
   #include <unistd.h>
 
